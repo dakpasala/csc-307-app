@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import Table from "./Table";
 import Form from "./Form";
 
@@ -8,7 +8,7 @@ function MyApp() {
   function removeOneCharacter(index) {
     const userToDelete = characters[index];
 
-    fetch(`http://localhost:8000/users/${userToDelete.id}`, {
+    fetch(`http://localhost:8000/users/${userToDelete._id}`, { // Use _id here
       method: "DELETE",
     })
       .then((response) => {
@@ -16,7 +16,7 @@ function MyApp() {
           const updated = characters.filter((_, i) => i !== index);
           setCharacters(updated);
         }
-        else if(response.status === 404) {
+        else if (response.status === 404) {
           console.log("User not found.");
         }
         else {
@@ -40,7 +40,7 @@ function MyApp() {
       })
       .then((data) => {
         if (data) {
-          setCharacters([...characters, data.user]);
+          setCharacters([...characters, { ...data.user, _id: data.user._id }]); // Ensure _id is used here
         }
       })
       .catch((error) => {
@@ -49,14 +49,13 @@ function MyApp() {
   }
 
   function fetchUsers() {
-    const promise = fetch("http://localhost:8000/users");
-    return promise;
+    return fetch("http://localhost:8000/users");
   }
 
   useEffect(() => {
     fetchUsers()
       .then((res) => res.json())
-      .then((json) => setCharacters(json["users_list"]))
+      .then((json) => setCharacters(json["users_list"].map(user => ({ ...user, _id: user._id })))) // Make sure _id is mapped correctly
       .catch((error) => {
         console.log(error);
       });
@@ -84,5 +83,3 @@ function MyApp() {
 }
 
 export default MyApp;
-
-
